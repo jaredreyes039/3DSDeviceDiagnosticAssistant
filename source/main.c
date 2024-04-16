@@ -4,10 +4,6 @@
 #include <3ds.h>
 #include <citro2d.h>
 
-// ATTENTION
-// Header file removed from SRC for handling scene defs and abstract.
-// Will be re-included in near future (this is an external issue)
-
 // Scene 0
 C2D_TextBuf g_staticBuf, g_dynamicBuf;
 C2D_Text g_staticText[6];
@@ -52,7 +48,6 @@ static void sceneRender(float size){
 	C2D_DrawText(&g_staticText[3], C2D_AtBaseline | C2D_WithColor | C2D_AlignLeft , 12.0f, 64.0f, 0.0f, 0.5f, 0.4f, C2D_Color32f(0.0f,0.7f,1.0f,0.625f));
 	C2D_DrawText(&g_staticText[4], C2D_AtBaseline | C2D_WithColor | C2D_AlignLeft , 12.0f, 166.0f, 0.0f, 0.5f, 0.4f, C2D_Color32f(0.0f,0.7f,1.0f,0.625f));
 	C2D_DrawText(&g_staticText[5], C2D_AtBaseline | C2D_WithColor | C2D_AlignRight , 376.0f, 240.0f, 0.0f, 0.5f, 0.4f, C2D_Color32f(0.0f,0.7f,1.0f,0.625f));
-
 
 	// Hardware Calibration Vars
 	touchPosition touch;
@@ -338,7 +333,7 @@ int main()
 	sceneInit();
 	sceneInit1();
 
-		float size = 0.5f;
+	float size = 0.5f;
 		
 		// BEGIN ANIMATION LOOP
 		// Can be optimized further
@@ -382,8 +377,7 @@ int main()
 			} 
 		}
 	
-		// Return to Hbrew
-		// Add bottom text start to exit
+
 		if(kDown & KEY_START)break;
 	}
 	// END ANIMATION LOOP
