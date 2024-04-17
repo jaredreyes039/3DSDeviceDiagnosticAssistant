@@ -3,6 +3,7 @@
 #include <string.h>
 #include <3ds.h>
 #include <citro2d.h>
+#include "scene0.h"
 
 // Scene 0
 C2D_TextBuf g_staticBuf, g_dynamicBuf;
@@ -13,14 +14,11 @@ C2D_TextBuf g_staticBuf1, g_dynamicBuf1;
 C2D_Text g_staticText1[6];
 
 // SCENE 0
-static void sceneInit(void)
+static void initScene0(void)
 {
-//  Text needs memory buffers for drawing
-//  4096 just use case, might adjust
- g_staticBuf = C2D_TextBufNew(4096); 
- g_dynamicBuf = C2D_TextBufNew(4096);
+ g_staticBuf = C2D_TextBufNew(1024); 
+ g_dynamicBuf = C2D_TextBufNew(1024);
  
-//  Can I abstract this?
  C2D_TextParse(&g_staticText[0], g_staticBuf, "Device Health Check");
  C2D_TextParse(&g_staticText[1], g_staticBuf, "v1.0.0");
  C2D_TextParse(&g_staticText[2], g_staticBuf, "Hack the planet!");
@@ -28,58 +26,46 @@ static void sceneInit(void)
  C2D_TextParse(&g_staticText[4], g_staticBuf, "System Versions");
  C2D_TextParse(&g_staticText[5], g_staticBuf, "Author: Jay Reyes (c) 2024");
  
-//  Honestly, not sure HOW they do it, but it's necessary for perf.
- // Optimize the static text strings
  C2D_TextOptimize(&g_staticText[0]);
 }
 
-// Runs in anim loop
-static void sceneRender(float size){
-	// Since Jan 19XX, needs to be converted eventually to be useful
-	u64 time;
-	time = osGetTime();
-	
-	// Clear the dynamic text buffer
-	C2D_TextBufClear(g_dynamicBuf);
-
-	// Draw static text strings
+static void renderHeader0(void){
 	C2D_DrawText(&g_staticText[0], C2D_AtBaseline | C2D_WithColor | C2D_AlignLeft, 12.0f, 24.0f, 0.5f, 0.75f, 0.5f, C2D_Color32f(0.0f,1.0f,0.0f,0.625f));
 	C2D_DrawText(&g_staticText[1], C2D_AtBaseline | C2D_WithColor | C2D_AlignLeft,  220.0f, 24.0f, 0.5f, 0.65f, 0.45f, C2D_Color32f(0.0f,1.0f,0.0f,0.625f));
 	C2D_DrawText(&g_staticText[3], C2D_AtBaseline | C2D_WithColor | C2D_AlignLeft , 12.0f, 64.0f, 0.0f, 0.5f, 0.4f, C2D_Color32f(0.0f,0.7f,1.0f,0.625f));
 	C2D_DrawText(&g_staticText[4], C2D_AtBaseline | C2D_WithColor | C2D_AlignLeft , 12.0f, 166.0f, 0.0f, 0.5f, 0.4f, C2D_Color32f(0.0f,0.7f,1.0f,0.625f));
 	C2D_DrawText(&g_staticText[5], C2D_AtBaseline | C2D_WithColor | C2D_AlignRight , 376.0f, 240.0f, 0.0f, 0.5f, 0.4f, C2D_Color32f(0.0f,0.7f,1.0f,0.625f));
+}
 
-	// Hardware Calibration Vars
-	touchPosition touch;
-	hidTouchRead(&touch);
-	angularRate gyroscope;
-	hidGyroRead(&gyroscope);
-	circlePosition circlePad;
-	hidCircleRead(&circlePad);
-	float sliderPosition = osGet3DSliderState();
+static void renderTimeInterface(void){
+	u64 time;
+	time = osGetTime();
 
-	// Versions
-	u32 firmVer = osGetFirmVersion();
-	u32 coreVer = osGetSystemCoreVersion();
-	u32 kernelVer = osGetKernelVersion();
-
-	// System Time
 	char timeTextBuf[64];
 	C2D_Text timeText;
 	snprintf(timeTextBuf, sizeof(timeTextBuf), "System Time: %llu", time);
 	C2D_TextParse(&timeText, g_dynamicBuf, timeTextBuf);
 	C2D_TextOptimize(&timeText);
 	C2D_DrawText(&timeText, C2D_AtBaseline | C2D_WithColor | C2D_AlignLeft, 12.0f, 44.0f, 0.5f, 0.5f, 0.5f, C2D_Color32f(1.0f,1.0f,1.0f,1.0f));
+}
 
-	// Display touch positions
+static void renderTouchInterface(void){
+	// Init touch access
+	touchPosition touch;
+	hidTouchRead(&touch);
+	// print text
 	char touchTextBuf[64];
 	C2D_Text touchText;
 	snprintf(touchTextBuf, sizeof(touchTextBuf), "Touch Calibration: x: %d, y: %d", touch.px, touch.py);
 	C2D_TextParse(&touchText, g_dynamicBuf, touchTextBuf);
 	C2D_TextOptimize(&touchText);
 	C2D_DrawText(&touchText, C2D_AtBaseline | C2D_WithColor | C2D_AlignLeft, 24.0f, 76.0f, 0.5f, 0.5f, 0.5f, C2D_Color32f(1.0f,1.0f,1.0f,1.0f));
-	
-	// Helped me diagnose gyro issues w/ my 3DS lmao 
+}
+
+static void renderGyroInterface(void){
+	angularRate gyroscope;
+	hidGyroRead(&gyroscope);
+
 	HIDUSER_EnableGyroscope();
 	char gyroTextBuf[64];
 	C2D_Text gyroText;
@@ -87,26 +73,36 @@ static void sceneRender(float size){
 	C2D_TextParse(&gyroText, g_dynamicBuf, gyroTextBuf);
 	C2D_TextOptimize(&gyroText);
 	C2D_DrawText(&gyroText, C2D_AtBaseline | C2D_WithColor | C2D_AlignLeft, 24.0f, 98.0f, 0.5f, 0.5f, 0.5f, C2D_Color32f(1.0f,1.0f,1.0f,1.0f));
+}
 
-	// Helped me realize my joy stick is not calib.
-	// Build simple graphical UI (o)
+static void renderJoystickInterface(void){
+	circlePosition circlePad;
+	hidCircleRead(&circlePad);
+
 	char circleTextBuf[64];
 	C2D_Text circleText;
 	snprintf(circleTextBuf, sizeof(circleTextBuf), "Circle Pad Calibration: x: %d, y: %d", circlePad.dx, circlePad.dy);
 	C2D_TextParse(&circleText, g_dynamicBuf, circleTextBuf);
 	C2D_TextOptimize(&circleText);
 	C2D_DrawText(&circleText, C2D_AtBaseline | C2D_WithColor | C2D_AlignLeft, 24.0f, 120.0f, 0.5f, 0.5f, 0.5f, C2D_Color32f(1.0f,1.0f,1.0f,1.0f));
-  
-	// 0-1 Floats
+}
+
+static void renderSliderInterface(void){
+	float sliderPosition = osGet3DSliderState();
+
 	char sliderTextBuf[64];
 	C2D_Text sliderText;
 	snprintf(sliderTextBuf, sizeof(sliderTextBuf), "Slider Calibration: position: %f", sliderPosition);
 	C2D_TextParse(&sliderText, g_dynamicBuf, sliderTextBuf);
 	C2D_TextOptimize(&sliderText);
 	C2D_DrawText(&sliderText, C2D_AtBaseline | C2D_WithColor | C2D_AlignLeft, 24.0f, 142.0f, 0.5f, 0.5f, 0.5f, C2D_Color32f(1.0f,1.0f,1.0f,1.0f));
+}
 
-	// Versioning for lookups
-	// Move to classes?
+static void renderFirmwareInterface(void){
+	u32 firmVer = osGetFirmVersion();
+	u32 coreVer = osGetSystemCoreVersion();
+	u32 kernelVer = osGetKernelVersion();
+
 	char firmTextBuf[64];
 	C2D_Text firmText;
 	snprintf(firmTextBuf, sizeof(firmTextBuf), "Firmware Version: %d", firmVer);
@@ -127,20 +123,34 @@ static void sceneRender(float size){
 	C2D_DrawText(&kernelText, C2D_AtBaseline | C2D_WithColor | C2D_AlignLeft, 24.0f, 222.0f, 0.5f, 0.5f, 0.5f, C2D_Color32f(1.0f,1.0f,1.0f,1.0f));
 }
 
+static void compileInterfaces(void){
+	renderTimeInterface();
+	renderTouchInterface();
+	renderGyroInterface();
+	renderJoystickInterface();
+	renderSliderInterface();
+	renderFirmwareInterface();	
+}
 
-static void sceneExit(void){
- // Delete the text buffers
- C2D_TextBufDelete(g_dynamicBuf);
- C2D_TextBufDelete(g_staticBuf);
+// Runs in anim loop
+static void buildScene0(float size){
+	C2D_TextBufClear(g_dynamicBuf);
+	renderHeader0();
+	compileInterfaces();
+}
+
+
+static void exitScene0(void){
+	C2D_TextBufDelete(g_dynamicBuf);
+	C2D_TextBufDelete(g_staticBuf);
 }
 
 // SCENE 1
-static void sceneInit1(void){
-    g_staticBuf1 = C2D_TextBufNew(4096);
-    g_dynamicBuf1 = C2D_TextBufNew(4096);
+static void initScene1(void){
+	g_staticBuf1 = C2D_TextBufNew(4096);
+	g_dynamicBuf1 = C2D_TextBufNew(4096);
 	
-	// Abstract it?
-    C2D_TextParse(&g_staticText1[0], g_staticBuf1, "Device Health Check");
+	C2D_TextParse(&g_staticText1[0], g_staticBuf1, "Device Health Check");
 	C2D_TextParse(&g_staticText1[1], g_staticBuf1, "v1.0.0");
  	C2D_TextParse(&g_staticText1[2], g_staticBuf1, "Hack the planet!");
  	C2D_TextParse(&g_staticText1[3], g_staticBuf1, "Battery Health");
@@ -148,10 +158,10 @@ static void sceneInit1(void){
 	C2D_TextParse(&g_staticText1[5], g_staticBuf1, "Visit https://jaydevdesign.com for more source code!");
 
 
-    C2D_TextOptimize(&g_staticText1[0]);
+	C2D_TextOptimize(&g_staticText1[0]);
 }
 
-static void sceneRender1(size){
+static void renderScene1(size){
 	C2D_TextBufClear(g_dynamicBuf1);
 
 	// Abstract it?
@@ -324,27 +334,20 @@ int main()
 	// Scene state
 	int renderedScene = 0;
 	int *currentScene = &renderedScene;
-
 	// Create screen 
-	// Can be used for bottom as well
 	C3D_RenderTarget* top = C2D_CreateScreenTarget(GFX_TOP, GFX_LEFT);
-	
+	C3D_RenderTarget* bottom = C2D_CreateScreenTarget(GFX_BOTTOM, GFX_LEFT);
 	// Initialize the scene (not included in loop)
-	sceneInit();
-	sceneInit1();
-
+	initScene0();
+	initScene1();
 	float size = 0.5f;
 		
 		// BEGIN ANIMATION LOOP
-		// Can be optimized further
 	while (aptMainLoop())
 	{
 		// User input event scanner
 		hidScanInput();
-		
-		// User input event output (citro2D u32)
 		u32 kDown = hidKeysDown();
-
 		if(*currentScene == 0){
 			// Start C3D Frame (Move outside?)
 			C3D_FrameBegin(C3D_FRAME_SYNCDRAW); // Move out of if?
@@ -354,36 +357,35 @@ int main()
 			C2D_TargetClear(top, C2D_Color32(0x02, 0x02, 0x02, 0xFF));
 			C2D_SceneBegin(top);
 			// isolate to if
-			sceneRender(size); 
+			buildScene0(size); 
 			C3D_FrameEnd(0);
 		}
+		else{
+			// remove 
+			C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
+			// Both dark screens :3
+			// remove
+			C2D_TargetClear(top, C2D_Color32(0x02, 0x02, 0x02, 0xFF));
+			C2D_SceneBegin(top);
+			// isolate
+			renderScene1(size);
+			// move out of else
+			C3D_FrameEnd(0);
+		} 
 		if(kDown & KEY_A){
 			if(*currentScene == 0){
 				renderedScene = 1;
 			} else {
 				renderedScene = 0;
 			}
-			if(*currentScene == 1){
-				// remove 
-				C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
-				// Both dark screens :3
-				// remove
-				C2D_TargetClear(top, C2D_Color32(0x02, 0x02, 0x02, 0xFF));
-				C2D_SceneBegin(top);
-				// isolate
-				sceneRender1(size);
-				// move out of else
-				C3D_FrameEnd(0);
-			} 
+			
 		}
-	
-
 		if(kDown & KEY_START)break;
 	}
 	// END ANIMATION LOOP
 
 	// Deinitialize the scene
-	sceneExit();
+	exitScene0();
 	
 	// Deinitialize the libs
 	C2D_Fini();

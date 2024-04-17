@@ -106,7 +106,8 @@ main.o: /home/jaydev/Development/3DSDeviceHealthMonitor/source/main.c \
  /opt/devkitpro/libctru/include/c2d/spritesheet.h \
  /opt/devkitpro/libctru/include/c2d/sprite.h \
  /opt/devkitpro/libctru/include/c2d/text.h \
- /opt/devkitpro/libctru/include/c2d/font.h
+ /opt/devkitpro/libctru/include/c2d/font.h \
+ /home/jaydev/Development/3DSDeviceHealthMonitor/includes/scene0.h
 /opt/devkitpro/libctru/include/3ds.h:
 /opt/devkitpro/libctru/include/3ds/types.h:
 /opt/devkitpro/libctru/include/3ds/result.h:
@@ -215,3 +216,4 @@ main.o: /home/jaydev/Development/3DSDeviceHealthMonitor/source/main.c \
 /opt/devkitpro/libctru/include/c2d/sprite.h:
 /opt/devkitpro/libctru/include/c2d/text.h:
 /opt/devkitpro/libctru/include/c2d/font.h:
+/home/jaydev/Development/3DSDeviceHealthMonitor/includes/scene0.h:
