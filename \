@@ -7,18 +7,20 @@
 
 // Scene 0
 // C2D_TextBuf C2D_TextBufNew(size)
-// struct {C2D_TextBuf buf; size_t begin; size_t end; float width; u32 lines; u32 words; C2D_Font font;} = C2D_Text 
 C2D_TextBuf g_staticBuf, g_dynamicBuf;
+// struct {C2D_TextBuf buf; size_t begin; size_t end; float width; u32 lines; u32 words; C2D_Font font;} = C2D_Text 
 C2D_Text g_staticText[6];
 
 // Scene 1
 C2D_TextBuf g_staticBuf1, g_dynamicBuf1;
 C2D_Text g_staticText1[6];
 
-static void initScene1(void){
+// SCENE 0
+// SCENE 1
+static void initScene1(g_staticBuf, g_dynamicBuf, g_staticText){
 	g_staticBuf1 = C2D_TextBufNew(4096);
 	g_dynamicBuf1 = C2D_TextBufNew(4096);
-
+	
 	C2D_TextParse(&g_staticText1[0], g_staticBuf1, "Device Health Check");
 	C2D_TextParse(&g_staticText1[1], g_staticBuf1, "v1.0.0");
  	C2D_TextParse(&g_staticText1[2], g_staticBuf1, "Hack the planet!");
@@ -60,7 +62,6 @@ static void renderScene1(size){
 	ACU_GetWifiStatus(&wifiStatus);
 	ACU_GetProxyEnable(&proxyEnabled);
 	ACU_GetSecurityMode(&securityMode);
-
 
 	char batLevBuf[64];
 	C2D_Text batLevText;
@@ -180,44 +181,66 @@ static void sceneExit1(){
 // MAIN
 int main()
 {
+	// IGNORE THIS COMMENT - FOR DOCS PROJECT
+	// ######################################################
+	// 3DS GRAPHICS PIPELINE:
+	// GFX gives card access w/ Init (gfxInitDefault())
+	// INIT 3D and 2D Respectively
+	// In this case, I focus only on 2D for now (C2D_Prepare())
+	// IN LOOP:
+	//  1. SYNCDRAW FRAME IN FRAMEBEGIN (3D)
+	//  2. CLEAR FRAME
+	//  3. BEGIN SCENE RENDER
+	//  4. DRAWING, SHADERS, ETC. IN RENDER FUNC
+	//  5. END FRAME
+	// #######################################################
+
 	// Initialize graphics
 	gfxInitDefault();
 	// 3D Init necessary for 2D function
 	C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
 	C2D_Init(C2D_DEFAULT_MAX_OBJECTS);
-	// Prep init 2D
 	C2D_Prepare();
 
 	// Scene state
 	int renderedScene = 0;
 	int *currentScene = &renderedScene;
-	
 	// Create screen 
 	C3D_RenderTarget* top = C2D_CreateScreenTarget(GFX_TOP, GFX_LEFT);
 	C3D_RenderTarget* bottom = C2D_CreateScreenTarget(GFX_BOTTOM, GFX_LEFT);
 	// Initialize the scene (not included in loop)
-	initScene0(g_staticBuf, g_dynamicBuf, g_staticText);
+	initScene0();
 	initScene1();
 	float size = 0.5f;
 		
-	// BEGIN ANIMATION LOOP
+		// BEGIN ANIMATION LOOP
 	while (aptMainLoop())
 	{
 		// User input event scanner
 		hidScanInput();
 		u32 kDown = hidKeysDown();
 		if(*currentScene == 0){
+			// Start C3D Frame (Move outside?)
 			C3D_FrameBegin(C3D_FRAME_SYNCDRAW); // Move out of if?
+			// I like black screen terminals Im sorry <3
+			// Clear screen
+			// Move these out of if?
 			C2D_TargetClear(top, C2D_Color32(0x02, 0x02, 0x02, 0xFF));
 			C2D_SceneBegin(top);
-			buildScene0(size, g_dynamicBuf, g_staticText); 
+			// isolate to if
+			buildScene0(size); 
 			C3D_FrameEnd(0);
 		}
 		else{
+			// remove 
 			C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
+			// Both dark screens :3
+			// remove
 			C2D_TargetClear(top, C2D_Color32(0x02, 0x02, 0x02, 0xFF));
 			C2D_SceneBegin(top);
+			// isolate
 			renderScene1(size);
+			// move out of else
 			C3D_FrameEnd(0);
 		} 
 		if(kDown & KEY_A){
@@ -233,7 +256,7 @@ int main()
 	// END ANIMATION LOOP
 
 	// Deinitialize the scene
-	exitScene0(g_staticBuf, g_dynamicBuf);
+	exitScene0();
 	
 	// Deinitialize the libs
 	C2D_Fini();

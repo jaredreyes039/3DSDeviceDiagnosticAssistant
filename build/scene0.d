@@ -1,4 +1,5 @@
-scene0.o: /home/jaydev/Development/3DSDeviceHealthMonitor/source/scene0.c \
+scene0.o: /home/jaydev/Development/3DSTestSuite/source/scene0.c \
+ /home/jaydev/Development/3DSTestSuite/includes/scene0.h \
  /opt/devkitpro/libctru/include/3ds.h \
  /opt/devkitpro/libctru/include/3ds/types.h \
  /opt/devkitpro/libctru/include/3ds/result.h \
@@ -106,8 +107,8 @@ scene0.o: /home/jaydev/Development/3DSDeviceHealthMonitor/source/scene0.c \
  /opt/devkitpro/libctru/include/c2d/spritesheet.h \
  /opt/devkitpro/libctru/include/c2d/sprite.h \
  /opt/devkitpro/libctru/include/c2d/text.h \
- /opt/devkitpro/libctru/include/c2d/font.h \
- /home/jaydev/Development/3DSDeviceHealthMonitor/includes/scene0.h
+ /opt/devkitpro/libctru/include/c2d/font.h
+/home/jaydev/Development/3DSTestSuite/includes/scene0.h:
 /opt/devkitpro/libctru/include/3ds.h:
 /opt/devkitpro/libctru/include/3ds/types.h:
 /opt/devkitpro/libctru/include/3ds/result.h:
@@ -216,4 +217,3 @@ scene0.o: /home/jaydev/Development/3DSDeviceHealthMonitor/source/scene0.c \
 /opt/devkitpro/libctru/include/c2d/sprite.h:
 /opt/devkitpro/libctru/include/c2d/text.h:
 /opt/devkitpro/libctru/include/c2d/font.h:
-/home/jaydev/Development/3DSDeviceHealthMonitor/includes/scene0.h:
